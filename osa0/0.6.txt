@@ -1,7 +1,7 @@
 title Uuden muistiinpanon luominen SPA:ssa
 
 note over Selain: käyttäjä syöttää tekstisyöttökenttään ja painaa tallenna\n(tai enter-näppäintä); 'notes_form' -lomake-elementin\nkustomoitu submit-funktio suoritetaan ja käyttäjän\nsyötteestä sekä nykyisestä aikaleimasta muodostetaan\nobjekti
-note over Selain: selain suorittaa funktion redrawNotes(), mikä muodostaa\nsivulle listan notes-listasta, jossa nyt on myös käyttäjän\nuusi viesti; lisäksi suoritetaan funktio sendToServer(),\nmissä selain lähettää muistiinpanon JSON-muodossa\n /new_note_spa-osoitteeseen
+note over Selain: selain suorittaa funktion redrawNotes(), joka muodostaa\nsivulle listan notes-listasta, jossa nyt on myös käyttäjän\nuusi viesti; lisäksi suoritetaan funktio sendToServer(),\njossa selain lähettää muistiinpanon JSON-muodossa\n /new_note_spa-osoitteeseen
 Selain->Palvelin: HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note_spa
 note over Palvelin: palvelimella suoritetaan osoitteessa /new_note_spa oleva controller-koodi,\njoka lisää osoitteeseen tulleen viestin data.json -tiedostoon
 Palvelin-->Selain: viesti '{"message":"note created"}'

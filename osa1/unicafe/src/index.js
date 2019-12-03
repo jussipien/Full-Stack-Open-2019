@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 
 const Header = ({ text }) => <><h1>{text}</h1></>
 

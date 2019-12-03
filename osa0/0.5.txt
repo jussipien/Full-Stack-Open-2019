@@ -1,0 +1,11 @@
+title Siirtyminen osoitteeseen .../spa
+
+Selain->Palvelin: HTTP GET https://fullstack-exampleapp.herokuapp.com/spa
+Palvelin-->Selain: HTML-koodi
+Selain->Palvelin: HTTP GET https://fullstack-exampleapp.herokuapp.com/main.css
+Palvelin-->Selain: main.css
+Selain->Palvelin: HTTP GET https://fullstack-exampleapp.herokuapp.com/spa.js
+Palvelin-->Selain: spa.js
+Selain->Palvelin: HTTP GET https://fullstack-exampleapp.herokuapp.com/data.json
+Palvelin-->Selain: data.json
+note over Selain: selain suorittaa funktion redrawNotes() ja täyttää\nsivulla näkyvän listan data.jsonin sisällöllä

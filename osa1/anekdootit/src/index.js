@@ -7,6 +7,7 @@ const Button = ({onClick, text}) => <><button onClick={onClick}>{text}</button><
 
 const VoteCounter = ({counter}) => <><p>has <b>{counter}</b> votes</p></>
 
+// displays most voted anectode if any anoctode has voted, else displays nothing
 const AnectodeWithMostVotes = ({anecdotes, votes, mostVoted}) => {
   console.log(votes, mostVoted)
   if (mostVoted === -1) {
@@ -28,13 +29,17 @@ const AnectodeWithMostVotes = ({anecdotes, votes, mostVoted}) => {
 const App = (props) => {
   const [selected, setSelected] = useState(0)
   const [votes, setVotes] = useState(Array(6).fill(0))
+
+  // state with index of most voted, initialized as -1 to indicate a state where nothing is voted yet
   const [mostVoted, setMostVoted] = useState(-1)
 
+  // selects random index and sets it as state of selected
   const randomAnecdote = () => {
     const index = Math.floor(Math.random() * props.anecdotes.length)
     return setSelected(index)
   }
 
+  // adds a vote to the selected anecdote and updates the most voted anecdote
   const setVoteStates = () => {
     const copy = [...votes]
     copy[selected] += 1
@@ -58,6 +63,7 @@ const App = (props) => {
     <div>
       <section>
         <div>
+          {/* this div could be a component */}
           <Header text="Anecdote of the day"/>
           <p>{props.anecdotes[selected]}</p>
           <VoteCounter counter={votes[selected]}/>

@@ -32,6 +32,8 @@ const Statistics = ({ buttons }) => {
     const all = b1[0]+b2[0]+b3[0]
     const average = (b1[0]-b3[0])/all
     const positive = (b1[0]/all)*100
+
+    // add percent mark to displayed value
     const positiveStr = positive.toString().concat(' %')
 
     if ([b1[0], b2[0], b3[0]].some(x => x > 0)) {

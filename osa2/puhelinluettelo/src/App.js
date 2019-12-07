@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect  } from 'react'
+import axios from 'axios'
 
 const Filter = ({inputFilter, newFilter}) => {
   return (
@@ -29,27 +30,39 @@ const PersonForm = ({inputName, newName, inputNumber, newNumber, onSubmit}) => {
   )
 }
 
-const PersonList = ({persons}) => {
+const PersonTable = ({persons}) => {
   const personsToShow = persons.filter(person => person.display === true)
-  const listItems = () =>
-    personsToShow.map(person => <li key={person.name}>{person.name} {person.number}</li>)
+  const tableItems = () =>
+    personsToShow.map(person => <tr key={person.name}><td>{person.name}</td><td>{person.number}</td></tr>)
   return (
-    <ul style={{listStyle:'none'}}>
-      {listItems()}
-    </ul>
+    <table>
+      <tbody>
+        {tableItems()}
+      </tbody>
+    </table>
   )
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', display: true },
-    { name: 'Ada Lovelace', number: '39-44-5323523', display: true },
-    { name: 'Dan Abramov', number: '12-43-234345', display: true },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', display: true }
-  ]) 
+  // const [persons, setPersons] = useState([
+  //   { name: 'Arto Hellas', number: '040-123456', display: true },
+  //   { name: 'Ada Lovelace', number: '39-44-5323523', display: true },
+  //   { name: 'Dan Abramov', number: '12-43-234345', display: true },
+  //   { name: 'Mary Poppendieck', number: '39-23-6423122', display: true }
+  // ])
+
+  const [ persons, setPersons ] = useState([])
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ newFilter, setNewFilter ] = useState('')
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+      })
+  }, [])
 
   const inputFilter = (event) => {
     const string = event.target.value
@@ -109,7 +122,7 @@ const App = () => {
       </div>
       <div>
         <h2>Numbers</h2>
-        <PersonList persons={persons}/>
+        <PersonTable persons={persons}/>
       </div>
     </div>
   )

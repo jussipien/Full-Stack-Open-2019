@@ -1,32 +1,80 @@
 import React, { useState } from 'react'
 
-const PersonList = ({persons}) => {
-  const listItems = () =>
-    persons.map(person => <li key={person.name}>{person.name} {person.number}</li>)
+const Filter = ({inputFilter, newFilter}) => {
   return (
-    listItems()
+  <>
+    <label htmlFor="filter">filter shown with</label>
+    <input type="text" id="filter" name="filter" onChange={inputFilter} value={newFilter}/>
+  </>
+  )
+}
+
+const PersonForm = ({inputName, newName, inputNumber, newNumber, onSubmit}) => {
+  return (
+    <>
+    <form onSubmit={onSubmit}>
+      <div>
+        <label htmlFor="name">name</label>
+        <input type="text" id="name" name="name" required={true} onChange={inputName} value={newName}/>
+      </div>
+      <div>
+        <label htmlFor="number">number</label>
+        <input type="text" id="number" name="number" required={true} onChange={inputNumber} value={newNumber}/>
+      </div>
+      <div>
+        <button type="submit">add</button>
+      </div>
+    </form>
+    </>
+  )
+}
+
+const PersonList = ({persons}) => {
+  const personsToShow = persons.filter(person => person.display === true)
+  const listItems = () =>
+    personsToShow.map(person => <li key={person.name}>{person.name} {person.number}</li>)
+  return (
+    <ul style={{listStyle:'none'}}>
+      {listItems()}
+    </ul>
   )
 }
 
 const App = () => {
   const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456' },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-    { name: 'Dan Abramov', number: '12-43-234345' },
-    { name: 'Mary Poppendieck', number: '39-23-6423122' }
+    { name: 'Arto Hellas', number: '040-123456', display: true },
+    { name: 'Ada Lovelace', number: '39-44-5323523', display: true },
+    { name: 'Dan Abramov', number: '12-43-234345', display: true },
+    { name: 'Mary Poppendieck', number: '39-23-6423122', display: true }
   ]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
+  const [ newFilter, setNewFilter ] = useState('')
 
-  const inputName = (event) => {
-    setNewName(event.target.value)
+  const inputFilter = (event) => {
+    const string = event.target.value
+    setNewFilter(string)
+    let personsCopy = [...persons]
+    if (!!string) {
+      console.log('string exists')
+      personsCopy.forEach(person => person.display = person.name.toLowerCase().includes(string.toLowerCase()))
+    } else {
+      console.log('no string')
+      personsCopy.forEach(person => person.display = true)
+    }
+    console.log('personsCopy', personsCopy)
+    return setPersons(personsCopy)
   }
 
-  const inputNumber = (event) => {
+  const inputName = (event) => setNewName(event.target.value)
 
-  }
+  const inputNumber = (event) => setNewNumber(event.target.value)
 
   const onSubmit = (event) => {
+    return handleSubmit(event)
+  }
+
+  const handleSubmit = (event) => {
     event.preventDefault()
     console.log(persons)
     if (persons.find(person => person.name === newName)) {
@@ -34,32 +82,35 @@ const App = () => {
     } else {
       const personObject= {
         name: newName,
+        number: newNumber,
+        display: undefined
+      }
+      if (!!newFilter) {
+        personObject.display = personObject.name.toLowerCase().includes(newFilter.toLowerCase())
+      } else {
+        personObject.display = true
       }
       setPersons(persons.concat(personObject))
     }
     setNewName('')
+    setNewNumber('')
+    // setNewFilter('')
   }
 
   return (
     <div>
-      <h2>Phonebook</h2>
-      <form onSubmit={onSubmit}>
-        <div>
-          <label htmlFor="name">name</label>
-          <input type="text" name="name" onChange={inputName} value={newName}/>
-        </div>
-        <div>
-          <label htmlFor="number">number</label>
-          <input type="text" name="number"onChange={inputNumber} value={newNumber}/>
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-      <h2>Numbers</h2>
-      <ul style={{listStyle:'none'}}>
+      <div>
+        <h1>Phonebook</h1>
+        <Filter inputFilter={inputFilter} newFilter={newFilter}/>
+      </div>
+      <div>
+        <h2>add a new</h2>
+        <PersonForm inputName={inputName} newName={newName} inputNumber={inputNumber} newNumber={newNumber} onSubmit={onSubmit}/>
+      </div>
+      <div>
+        <h2>Numbers</h2>
         <PersonList persons={persons}/>
-      </ul>
+      </div>
     </div>
   )
 

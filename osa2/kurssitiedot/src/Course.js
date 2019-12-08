@@ -3,7 +3,7 @@ import React from 'react'
 const Header = ({name}) => {
   return (
     <>
-      <h1>{name}</h1>
+      <h2>{name}</h2>
     </>
   )
 }
@@ -29,8 +29,10 @@ const Content = ({parts}) => {
 }
 
 const Total = ({parts}) => {
-  // let amount = 0 
+   
+  // calculate total amount of exercises for course
   const amount = parts.reduce((accumulator, {exercises}) => console.log(accumulator, exercises) || accumulator + exercises, 0)
+  // let amount = 0
   // parts.forEach(part => {
   //   amount += part.exercises
   // })

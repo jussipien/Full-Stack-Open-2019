@@ -2,8 +2,10 @@ import React, { useState, useEffect  } from 'react'
 import Services from './services/services'
 import './App.css'
 
+// dictates how long a message from axios operation stays on screen
 const messageTimeout = 5000
 
+// returns a message when the state of messageText changes, styled depending on parameter type
 const Message = ({text, type}) => {
   if (!!text) {
     const classes = `Message ${type}`
@@ -17,6 +19,7 @@ const Message = ({text, type}) => {
   }
 }
 
+// component for search filter input and its label
 const Filter = ({inputFilter, newFilter}) => {
   return (
   <>
@@ -26,30 +29,57 @@ const Filter = ({inputFilter, newFilter}) => {
   )
 }
 
+// used for manipulating record data: can add new names and numbers to the phonebook and change numbers
+// attached to existing names
 const PersonForm = ({inputName, newName, inputNumber, newNumber, onSubmit}) => {
   return (
     <>
     <form onSubmit={onSubmit}>
-      <div>
-        <label htmlFor="name">name</label>
-        <input type="text" id="name" name="name" required={true} onChange={inputName} value={newName}/>
-      </div>
-      <div>
-        <label htmlFor="number">number</label>
-        <input type="text" id="number" name="number" required={true} onChange={inputNumber} value={newNumber}/>
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <label htmlFor="name">name</label>
+            </td>
+            <td>
+              <input type="text" id="name" name="name" required={true} onChange={inputName} value={newName}/>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label htmlFor="number">number</label>
+            </td>
+            <td>
+              <input type="text" id="number" name="number" required={true} onChange={inputNumber} value={newNumber}/>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button type="submit">add</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </form>
     </>
   )
 }
 
+// displays the names and numbers in the phonebook as table rows, along with a delete button
+// that deletes the row's record
 const PersonTable = ({persons, onClickDelete}) => {
   const personsToShow = persons.filter(person => person.display === true)
-  const tableItems = () =>
-    personsToShow.map(person => <tr key={person.name + "-" + person.id}><td>{person.name}</td><td>{person.number}</td><td><button onClick={onClickDelete} data-id={person.id}>delete</button></td></tr>)
+
+  const tableItems = () => personsToShow.map(person => {
+    return(
+      <tr key={person.name + "-" + person.id}>
+        <td>{person.name}</td>
+        <td>{person.number}</td>
+        <td><button onClick={onClickDelete} data-id={person.id}>delete</button></td>
+      </tr>
+    )
+  })
+
   return (
     <table>
       <tbody>
@@ -74,15 +104,19 @@ const App = () => {
   const [ messageText, setMessageText ] = useState('')
   const [ messageType, setMessageType ] = useState('')
 
+  // initializes the phonebook data when the app is first rendered
   useEffect(() => {
     // axios
     //   .get('http://localhost:3001/persons')
       Services.getAll()
       .then(response => {
+        response.data.forEach((person, index) => response.data[index].display = true)
         setPersons(response.data)
       })
   }, [])
 
+  // filters the phonebook each time the value in the filter field changes; sets everything to be
+  // displayed if the filter is empty
   const inputFilter = (event) => {
     const string = event.target.value
     setNewFilter(string)
@@ -106,6 +140,8 @@ const App = () => {
     return handleSubmit(event)
   }
 
+  // handles the deletion of a row in the phonebook table; uses custom attribute 'data-id- of button
+  // to get the id of the record
   const onClickDelete = (event) => {
     const id = event.target.getAttribute('data-id')
     console.log(id)
@@ -124,6 +160,8 @@ const App = () => {
     }
   }
 
+  // sets the display message and type, making a message appear on screen
+  // message disappears after timeout
   const displayMessage = (text, type, timeout) => {
       setMessageText(text)
       setMessageType(type)
@@ -132,6 +170,7 @@ const App = () => {
       }, timeout)
   }
 
+  // decides whether to create a new record or update an exisiting one
   const handleSubmit = (event) => {
     event.preventDefault()
     console.log({persons})
@@ -139,14 +178,13 @@ const App = () => {
     console.log(index)
     if (index !== -1) {
       // alert(`${newName} is already added to phonebook!`)
-      if (window.confirm(`${newName} is already added to phonebook, replate the old number with a new one?`)) {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         let personsCopy = [...persons]
         console.log({personsCopy})
-        const sameId = persons[index].id
-        personsCopy[index] = {...personsCopy[index], number: newNumber, id: sameId}
+        personsCopy[index] = {...personsCopy[index], number: newNumber}
         console.log(personsCopy[index])
         setPersons(personsCopy)
-        let updated = personsCopy[index]
+        const updated = personsCopy[index]
         console.log(updated)
         Services.update(updated.id, updated)
         .then(response => {
@@ -173,9 +211,9 @@ const App = () => {
         personObject.display = personObject.name.toLowerCase().includes(newFilter.toLowerCase())
       }
 
-      setPersons(persons.concat(personObject))
       Services.create(personObject)
       .then(response => {
+        setPersons(persons.concat(response.data))
         displayMessage(`${newName} added to phonebook`, 'success', messageTimeout)
         console.log(response)
       })
@@ -189,16 +227,16 @@ const App = () => {
     <div>
       <div>
         {/* <Message text="TEST ERROR" type="error"/> */}
-        <h1>Phonebook</h1>
+        <h2>Phonebook</h2>
         <Message text={messageText} type={messageType}/>
         <Filter inputFilter={inputFilter} newFilter={newFilter}/>
       </div>
       <div>
-        <h2>add a new</h2>
+        <h3>add a new</h3>
         <PersonForm inputName={inputName} newName={newName} inputNumber={inputNumber} newNumber={newNumber} onSubmit={onSubmit}/>
       </div>
       <div>
-        <h2>Numbers</h2>
+        <h3>Numbers</h3>
         <PersonTable persons={persons} onClickDelete={onClickDelete}/>
         {/* <Message text="TEST SUCCESS" type="success"/> */}
       </div>

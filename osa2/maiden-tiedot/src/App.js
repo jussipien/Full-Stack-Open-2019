@@ -13,6 +13,8 @@ const Search = ({inputSearchStr, searchStr}) => {
 }
 
 const CountryDetails = ({country, weather, setWeather}) => {
+
+  // get weather data with axios, construct object weatherData from response JSON and set it as state of 'weather'
   useEffect(() => {
     axios
       .get(`http://api.weatherstack.com/current?access_key=${accessKey}&query=${country.capital}`)
@@ -24,14 +26,16 @@ const CountryDetails = ({country, weather, setWeather}) => {
           windSpeed: response.data.current.wind_speed,
           windDir: response.data.current.wind_dir
         }
-        let weatherCopy = {...weather}
-        weatherCopy = weatherData
-        setWeather(weatherCopy)
+        // let weatherCopy = {...weather}
+        // weatherCopy = weatherData
+        setWeather(weatherData)
       })
   }, [])
 
-  const weatherIconImgs = () => weather.weatherIcons.map(iconSrc => <img src={iconSrc} alt={iconSrc}/>)
+  // map icon array into img tags
+  const weatherIconImgs = () => weather.weatherIcons.map(iconSrc => <img key={iconSrc} src={iconSrc} alt={iconSrc}/>)
 
+  // return view of single country's details
   return (
     <div id="countryDetails" itemScope itemType="https://schema.org/Country">
       <h1>{country.name}</h1>
@@ -39,7 +43,7 @@ const CountryDetails = ({country, weather, setWeather}) => {
       <p>population {country.population}</p>
       <h2>languages</h2>
       <ul id="languageList">
-        {country.languages.map(language => <li key={language.name}>{language.name}</li>)}
+        {country.languages.map(language => <li key={language.name + '-' + language.iso639_1}>{language.name}</li>)}
       </ul>
       <img id="flag" src={country.flag} alt={country.name} width="10%"/>
       <h2>Weather in {country.capital}</h2>
@@ -50,6 +54,8 @@ const CountryDetails = ({country, weather, setWeather}) => {
   )
 }
 
+// responsible for filtering the results and constructing a view of them; returns a single country's details
+// if a country's name is in the state 'selected'
 const View = ({countries, searchStr, selected, weather, setWeather, onClickShow}) => {
   if (selected === '') {
     if (!!searchStr) {
@@ -64,7 +70,7 @@ const View = ({countries, searchStr, selected, weather, setWeather, onClickShow}
         const rows = () => { 
           return(countriesToView.map(country => {
             return(
-              <div key={country.name}>
+              <div key={country.name + '-' + country.numericCode}>
                 <span>{country.name}</span>
                 <button data-name={country.name} onClick={onClickShow}>select</button>
               </div>
@@ -90,9 +96,15 @@ const View = ({countries, searchStr, selected, weather, setWeather, onClickShow}
 const App = () => {
   const [countries, setCountries] = useState([])
   const [searchStr, setSearchStr] = useState('')
+
+  // setselected is used when clicking a select button and editing the filter; the first one sets a country's name in
+  // the state's value, the second one clears the value
   const [selected, setSelected] = useState('')
+
+  // used to store data from weatherstack, could also probably do without this and use the weather data straight instead
   const [weather, setWeather] = useState({temperature: undefined, weatherIcons:[], windSpeed: undefined, windDir: undefined})
 
+  // get the array of country objects as data when the app is first rendered
   useEffect(() => {
     axios
       .get('https://restcountries.eu/rest/v2/all')
@@ -101,6 +113,7 @@ const App = () => {
       })
   }, [])
 
+  // set search filter string and null everything else
   const handleSearch = (value) => {
     setSearchStr(value)
     setSelected('')
@@ -112,6 +125,7 @@ const App = () => {
 
   const inputSearchStr = (event) => handleSearch(event.target.value)
 
+  // set the selected country by using an attribute on the button that launches the parameter event
   const onClickShow = (event) => setSelected(event.target.getAttribute('data-name'))
 
   return (

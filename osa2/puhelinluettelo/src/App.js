@@ -1,5 +1,21 @@
 import React, { useState, useEffect  } from 'react'
-import axios from 'axios'
+import Services from './services/services'
+import './App.css'
+
+const messageTimeout = 5000
+
+const Message = ({text, type}) => {
+  if (!!text) {
+    const classes = `Message ${type}`
+    return (
+    <div className={classes}>
+      <p>{text}</p>
+    </div>
+    )
+  } else {
+    return <></>
+  }
+}
 
 const Filter = ({inputFilter, newFilter}) => {
   return (
@@ -30,10 +46,10 @@ const PersonForm = ({inputName, newName, inputNumber, newNumber, onSubmit}) => {
   )
 }
 
-const PersonTable = ({persons}) => {
+const PersonTable = ({persons, onClickDelete}) => {
   const personsToShow = persons.filter(person => person.display === true)
   const tableItems = () =>
-    personsToShow.map(person => <tr key={person.name}><td>{person.name}</td><td>{person.number}</td></tr>)
+    personsToShow.map(person => <tr key={person.name + "-" + person.id}><td>{person.name}</td><td>{person.number}</td><td><button onClick={onClickDelete} data-id={person.id}>delete</button></td></tr>)
   return (
     <table>
       <tbody>
@@ -55,10 +71,13 @@ const App = () => {
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ newFilter, setNewFilter ] = useState('')
+  const [ messageText, setMessageText ] = useState('')
+  const [ messageType, setMessageType ] = useState('')
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
+    // axios
+    //   .get('http://localhost:3001/persons')
+      Services.getAll()
       .then(response => {
         setPersons(response.data)
       })
@@ -87,23 +106,67 @@ const App = () => {
     return handleSubmit(event)
   }
 
+  const onClickDelete = (event) => {
+    const id = event.target.getAttribute('data-id')
+    console.log(id)
+    const personToDelete = persons.find(person => person.id.toString() === id)
+    console.log(personToDelete)
+    if(window.confirm(`Delete ${personToDelete.name}?`)) {
+      const personsCopy = persons.filter(person => person.id.toString() !== id)
+      console.log(`removing record with id ${id}`)
+      Services.remove(id)
+      .then(displayError(`Removed ${newName} from phonebook`, 'success', messageTimeout))
+      return setPersons(personsCopy)
+    }
+  }
+
+  const displayError = (text, type, timeout) => {
+      setMessageText(text)
+      setMessageType(type)
+      setTimeout(() => {
+      setMessageText('')
+      }, timeout)
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault()
     console.log(persons)
-    if (persons.find(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook!`)
+    const index = persons.findIndex(person => person.name === newName)
+    if (index !== -1) {
+      // alert(`${newName} is already added to phonebook!`)
+      if (window.confirm(`${newName} is already added to phonebook, replate the old number with a new one?`)) {
+        let personsCopy = [...persons]
+        personsCopy[index].number = newNumber
+        setPersons(personsCopy)
+        const updated = personsCopy[index]
+        try {
+          Services.update(updated.id, updated)
+          .then(response => {
+            displayError(`Number of ${newName} changed`, 'success', messageTimeout)
+            console.log(response)
+          })
+        } catch (error) {
+          console.log(error)
+          displayError(`${newName} was already removed from server`, 'error', messageTimeout)
+        }
+      }
     } else {
-      const personObject= {
+      const personObject = {
         name: newName,
         number: newNumber,
-        display: undefined
+        display: true
       }
+
       if (!!newFilter) {
         personObject.display = personObject.name.toLowerCase().includes(newFilter.toLowerCase())
-      } else {
-        personObject.display = true
       }
+
       setPersons(persons.concat(personObject))
+      Services.create(personObject)
+      .then(response => {
+        displayError(`${newName} added to phonebook`, 'success', messageTimeout)
+        console.log(response)
+      })
     }
     setNewName('')
     setNewNumber('')
@@ -113,7 +176,9 @@ const App = () => {
   return (
     <div>
       <div>
+        <Message text="TEST ERROR" type="error"/>
         <h1>Phonebook</h1>
+        <Message text={messageText} type={messageType}/>
         <Filter inputFilter={inputFilter} newFilter={newFilter}/>
       </div>
       <div>
@@ -122,7 +187,8 @@ const App = () => {
       </div>
       <div>
         <h2>Numbers</h2>
-        <PersonTable persons={persons}/>
+        <PersonTable persons={persons} onClickDelete={onClickDelete}/>
+        <Message text="TEST SUCCESS" type="success"/>
       </div>
     </div>
   )

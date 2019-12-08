@@ -109,18 +109,22 @@ const App = () => {
   const onClickDelete = (event) => {
     const id = event.target.getAttribute('data-id')
     console.log(id)
-    const personToDelete = persons.find(person => person.id.toString() === id)
+    const personToDelete = persons.find(person => person.id === parseInt(id))
     console.log(personToDelete)
-    if(window.confirm(`Delete ${personToDelete.name}?`)) {
-      const personsCopy = persons.filter(person => person.id.toString() !== id)
-      console.log(`removing record with id ${id}`)
-      Services.remove(id)
-      .then(displayError(`Removed ${newName} from phonebook`, 'success', messageTimeout))
-      return setPersons(personsCopy)
+    if (window.confirm(`Delete ${personToDelete.name}?`)) {
+        const personsCopy = persons.filter(person => person.id !== parseInt(id))
+        console.log(`removing record with id ${id}`)
+        Services.remove(id)
+        .then(displayMessage(`Removed ${personToDelete.name} from phonebook`, 'success', messageTimeout))
+        .catch(error => {
+          console.log(error)
+          displayMessage(`Information of ${newName} has already been removed from server`, 'error', messageTimeout)
+        })
+        return setPersons(personsCopy)
     }
   }
 
-  const displayError = (text, type, timeout) => {
+  const displayMessage = (text, type, timeout) => {
       setMessageText(text)
       setMessageType(type)
       setTimeout(() => {
@@ -130,25 +134,33 @@ const App = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    console.log(persons)
+    console.log({persons})
     const index = persons.findIndex(person => person.name === newName)
+    console.log(index)
     if (index !== -1) {
       // alert(`${newName} is already added to phonebook!`)
       if (window.confirm(`${newName} is already added to phonebook, replate the old number with a new one?`)) {
         let personsCopy = [...persons]
-        personsCopy[index].number = newNumber
+        console.log({personsCopy})
+        const sameId = persons[index].id
+        personsCopy[index] = {...personsCopy[index], number: newNumber, id: sameId}
+        console.log(personsCopy[index])
         setPersons(personsCopy)
-        const updated = personsCopy[index]
-        try {
-          Services.update(updated.id, updated)
-          .then(response => {
-            displayError(`Number of ${newName} changed`, 'success', messageTimeout)
-            console.log(response)
-          })
-        } catch (error) {
+        let updated = personsCopy[index]
+        console.log(updated)
+        Services.update(updated.id, updated)
+        .then(response => {
+          displayMessage(`Number of ${newName} changed`, 'success', messageTimeout)
+          console.log(response)
+        })
+        .catch(error => {
           console.log(error)
-          displayError(`${newName} was already removed from server`, 'error', messageTimeout)
-        }
+          displayMessage(`Information of ${newName} has already been removed from server`, 'error', messageTimeout)
+          Services.getAll()
+          .then(response => {
+            setPersons(response.data)
+          })
+        })
       }
     } else {
       const personObject = {
@@ -164,7 +176,7 @@ const App = () => {
       setPersons(persons.concat(personObject))
       Services.create(personObject)
       .then(response => {
-        displayError(`${newName} added to phonebook`, 'success', messageTimeout)
+        displayMessage(`${newName} added to phonebook`, 'success', messageTimeout)
         console.log(response)
       })
     }
@@ -176,7 +188,7 @@ const App = () => {
   return (
     <div>
       <div>
-        <Message text="TEST ERROR" type="error"/>
+        {/* <Message text="TEST ERROR" type="error"/> */}
         <h1>Phonebook</h1>
         <Message text={messageText} type={messageType}/>
         <Filter inputFilter={inputFilter} newFilter={newFilter}/>
@@ -188,7 +200,7 @@ const App = () => {
       <div>
         <h2>Numbers</h2>
         <PersonTable persons={persons} onClickDelete={onClickDelete}/>
-        <Message text="TEST SUCCESS" type="success"/>
+        {/* <Message text="TEST SUCCESS" type="success"/> */}
       </div>
     </div>
   )

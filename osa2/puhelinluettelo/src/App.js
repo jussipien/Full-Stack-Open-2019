@@ -180,25 +180,32 @@ const App = () => {
       // alert(`${newName} is already added to phonebook!`)
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         let personsCopy = [...persons]
-        console.log({personsCopy})
-        let newDisplay = true
+        // console.log({personsCopy})
+        // let newDisplay = true
 
-        if (!!newFilter) {
-          newDisplay = newName.toLowerCase().includes(newFilter.toLowerCase())
-        }
+        // if (!!newFilter) {
+        //   newDisplay = newName.toLowerCase().includes(newFilter.toLowerCase())
+        // }
 
-        console.log(newDisplay)
+        // console.log(newDisplay)
 
-        let updated = {...personsCopy[index], number: newNumber, display: newDisplay}
+        let updated = {...personsCopy[index], number: newNumber}
+        delete updated.display
         console.log({updated})
 
-        personsCopy[index] = updated
+        // personsCopy[index] = updated
 
-        setPersons(personsCopy)
+        // setPersons(personsCopy)
         
-        delete updated.display
+        // delete updated.display
         Services.update(updated.id, updated)
         .then(response => {
+          response.data.display = true
+          if (!!newFilter) {
+            response.data.display = response.data.name.toLowerCase().includes(newFilter.toLowerCase())
+          }
+          personsCopy[index] = response.data
+          setPersons(personsCopy)
           displayMessage(`Number of ${newName} changed`, 'success', messageTimeout)
           console.log(response)
         })
@@ -207,7 +214,13 @@ const App = () => {
           displayMessage(`Information of ${newName} has already been removed from server`, 'error', messageTimeout)
           Services.getAll()
           .then(response => {
-            response.data.forEach((person, index) => response.data[index].display = true)
+            response.data.forEach((person, index) => {
+              if (!newFilter) {
+                response.data[index].display = true
+              } else {
+                response.data[index].display = response.data[index].name.toLowerCase().includes(newFilter.toLowerCase())
+              }
+            })
             setPersons(response.data)
           })
         })
@@ -216,21 +229,17 @@ const App = () => {
       let personObject = {
         name: newName,
         number: newNumber,
-        display: true
       }
 
-      if (!!newFilter) {
-        personObject.display = personObject.name.toLowerCase().includes(newFilter.toLowerCase())
-      }
-      let serviceObject = {...personObject}
-      delete serviceObject.display
-
-      console.log(serviceObject)
+      console.log(personObject)
 
       Services.create(personObject)
       .then(response => {
         console.log(response)
         response.data.display = true
+        if (!!newFilter) {
+          response.data.display = response.data.name.toLowerCase().includes(newFilter.toLowerCase())
+        }
         setPersons(persons.concat(response.data))
         displayMessage(`${newName} added to phonebook`, 'success', messageTimeout)
       })

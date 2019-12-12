@@ -144,6 +144,7 @@ const App = () => {
   // to get the id of the record
   const onClickDelete = (event) => {
     const id = event.target.getAttribute('data-id')
+    console.log(event.target)
     console.log(id)
     const personToDelete = persons.find(person => person.id === id)
     console.log(personToDelete)

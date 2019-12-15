@@ -97,4 +97,17 @@ describe('most liked blog', () => {
 
 })
 
+describe('bonus tests', () => {
+
+  test('author with most blogs is computed correctly', () => {
+    const result = listHelper.mostBlogs(blogs)
+    expect(result.blogs).toBe(3)
+  })
+
+  test('author with most likes is computed correctly', () => {
+    const result = listHelper.mostLikes(blogs)
+    expect(result.likes).toBe(17)
+  })
+})
+
 test

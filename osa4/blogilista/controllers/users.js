@@ -5,11 +5,11 @@ const User = require('../models/user')
 function SimpleValidationError(message, noUsername=false) {
   this.message = message,
   this.name = 'ValidationError'
-  this.noUsername = noUsername
+  // this.noUsername = noUsername
 }
 
 usersRouter.get('/', async (req, res) => {
-  const users = await User.find({}).populate('blogs', { url: 1, title: 1, author: 1, id: 1})
+  const users = await User.find({}).populate('blogs', {url: 1, title: 1, author: 1, id: 1})
   res.json(users.map(u => u.toJSON()))
 })
 
@@ -22,7 +22,7 @@ usersRouter.post('/', async (req, res, next) => {
     }
 
     if (body.password.length < 3) {
-      throw new SimpleValidationError(`User validation failed: username: Path \`password\` (\`${body.password}\`) is shorter than the minimum allowed length (3).`)
+      throw new SimpleValidationError(`User validation failed: password: Path \`password\` (\`${body.password}\`) is shorter than the minimum allowed length (3).`)
     }
 
     const saltRounds = 10

@@ -87,7 +87,7 @@ describe('tests for user model', () => {
       .post('/api/users')
       .send({'username': 'test', 'name': 'test', 'password': 't'})
     expect(resPost3.status).toBe(400)
-    expect(resPost3.body.error.message).toBe('User validation failed: username: Path `password` (`t`) is shorter than the minimum allowed length (3).')
+    expect(resPost3.body.error.message).toBe('User validation failed: password: Path `password` (`t`) is shorter than the minimum allowed length (3).')
   })
   
 

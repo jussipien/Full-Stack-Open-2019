@@ -4,9 +4,6 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const config = require('../utils/config')
 
-// very lazy way to avoid changing tests to check for authentication
-// let isNotTest = process.env.NODE_ENV !== 'test'
-
 blogsRouter.get('/', async (req, res) => {
   const blogs = await Blog.find({}).populate('user', {username: 1, name: 1, id: 1})
   res.json(blogs)

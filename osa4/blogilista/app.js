@@ -8,13 +8,14 @@ const blogsRouter = require('./controllers/blogs')
 const loginRouter = require('./controllers/login')
 const middleware = require('./utils/middleware')
 const mongoose = require('mongoose')
+const _logger = require('./utils/logger')
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    console.log('connected to MongoDB')
+    _logger.info('connected to MongoDB')
   })
   .catch((error) => {
-    console.log('error connection to MongoDB:', error.message)
+    _logger.info('error connection to MongoDB:', error.message)
   })
 
 app.use(cors())

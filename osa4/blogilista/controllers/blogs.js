@@ -4,30 +4,36 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const config = require('../utils/config')
 
+// very lazy way to avoid changing tests to check for authentication
+// let isNotTest = process.env.NODE_ENV !== 'test'
+
 blogsRouter.get('/', async (req, res) => {
   const blogs = await Blog.find({}).populate('user', {username: 1, name: 1, id: 1})
   res.json(blogs)
 })
   
 blogsRouter.post('/', async (req, res) => {
-  let body = req.body
-  if (!req.token) {
-    return res.status(401).json({error: 'token missing or invalid'})
-  }
-
   try {
+    let body = req.body
+
+    if (!req.token) {
+      return res.status(401).json({error: 'token missing or invalid'})
+    }
+
+  
     const decodedToken = jwt.verify(req.token, config.SECRET)
     if (!decodedToken.id) {
       return res.status(401).json({error: 'token missing or invalid'})
     }
 
     const user = await User.findById(decodedToken.id)
-
+    body.user = user._id
+    
     // const users = await User.find({})
     // const randomIndex = Math.floor(Math.random()*users.length)
     // let user = users[randomIndex]
     // console.log(user)
-    body.user = user._id
+    
     let blog = new Blog(body)
     // console.log(blog)
 
@@ -40,6 +46,7 @@ blogsRouter.post('/', async (req, res) => {
     }
   
     const savedBlog = await blog.save()
+
     delete user._id
     // console.log(user)
     let blogs = user.blogs.concat(savedBlog._id)
@@ -47,20 +54,20 @@ blogsRouter.post('/', async (req, res) => {
     // await User.findByIdAndUpdate(user._id, user)
     await user.save()
     // console.log(user)
-    res.status(201).json(savedBlog)
+    return res.status(201).json(savedBlog)
   } catch { (error) => 
     next(error)
   }
 })
 
 blogsRouter.delete('/:id', async (req, res) => {
-  if (!req.token) {
-    return res.status(401).json({error: 'token missing or invalid'})
-  }
-
-  const id = req.params.id
-
   try {
+    if (!req.token) {
+      return res.status(401).json({error: 'token missing or invalid'})
+    }
+
+    const id = req.params.id
+
     const decodedToken = jwt.verify(req.token, config.SECRET)
     // console.log(decodedToken)
     if (!decodedToken.id) {
@@ -72,7 +79,7 @@ blogsRouter.delete('/:id', async (req, res) => {
     if (blog.user.toString() !== decodedToken.id.toString()) {
       return res.status(401).json({error: 'only the user that added the blog can delete it'})
     } 
-    await Blog.findByIdAndDelete(id)
+    await blog.delete()
     // await Blog.findByIdAndDelete(id)
     res.status(204).end()
   } catch { (error) => 
@@ -82,6 +89,11 @@ blogsRouter.delete('/:id', async (req, res) => {
 })
 
 blogsRouter.put('/:id', async (req, res) => {
+  try {
+    if (!req.token) {
+      return res.status(401).json({error: 'token missing or invalid'})
+    }
+
   const id = req.params.id
   const body = req.body
 
@@ -89,9 +101,20 @@ blogsRouter.put('/:id', async (req, res) => {
     res.status(400).end()
   }
 
-  try {
+    const decodedToken = jwt.verify(req.token, config.SECRET)
+    if (!decodedToken.id) {
+      return res.status(401).json({error: 'token missing or invalid'})
+    }
+
+    const blog = await Blog.findById(id)
+
+    if (blog.user.toString() !== decodedToken.id.toString()) {
+      return res.status(401).json({error: 'only the user that added the blog can update it'})
+    } 
+    
     const updated = await Blog.findByIdAndUpdate(id, body, {new: true} )
-    res.status(200).json(updated.toJSON())
+
+    return res.status(200).json(updated.toJSON())
   } catch { (error) =>
     next(error)
       // res.status(404).json({'error': 'no blog found with given id'})

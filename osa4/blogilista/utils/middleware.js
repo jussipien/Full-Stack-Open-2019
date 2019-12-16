@@ -1,8 +1,10 @@
+const _logger = require('./logger')
+
 const requestLogger = (req, res, next) => {
-  console.log('Method:', req.method)
-  console.log('Path:  ', req.path)
-  console.log('Body:  ', req.body)
-  console.log('---')
+  _logger.info('Method:', req.method)
+  _logger.info('Path:  ', req.path)
+  _logger.info('Body:  ', req.body)
+  _logger.info('---')
   next()
 }
 
@@ -19,7 +21,7 @@ const unknownEndpoint = (req, res) => {
 }
   
 const errorHandler = (error, req, res, next) => {
-  console.error(error)
+  _logger.error(error)
 
   if (error.name === 'CastError' && error.kind == 'ObjectId') {
     return res.status(400).send({error: 'malformatted id'})

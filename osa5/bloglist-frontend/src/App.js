@@ -1,55 +1,12 @@
 import React, { useState, useEffect  } from 'react'
 import Blog from './components/Blog'
+import TableForm from './components/Form'
+import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
-import './App.css';
+import './App.css'
 
 const messageTimeout = 5000
-
-const Message = ({text, type}) => {
-  if (!!text) {
-    const classes = `Message ${type}`
-    return (
-    <div className={classes}>
-      <p>{text}</p>
-    </div>
-    )
-  } else {
-    return <></>
-  }
-}
-
-const FormRow = ({label, type, value, onChange}) => {
-  return (
-    <tr>
-      <td>
-        <label htmlFor={label}>{label}:</label> 
-      </td>
-      <td>
-        <input type={type} id={label} onChange={onChange} value={value} required={true}/>
-      </td>
-    </tr>
-  )
-}
-
-const TableForm = ({states, header, buttonAction, buttonLabel, messageText, messageType}) => {
-  const getStateRows = () => states.map(state => <FormRow key={state.id} label={state.label} type={state.type} value={state.value} onChange={state.onChange}/>)
-
-  return (
-    <section>
-      <h2>{header}</h2>
-      <Message text={messageText} type={messageType}/>
-        <form>
-          <table>
-            <tbody>
-            {getStateRows()}
-            </tbody>
-          </table>
-          <button className="form-btn" onClick={buttonAction}>{buttonLabel}</button>
-        </form>
-    </section>
-  )
-}
 
 const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, messageType}) => {
   if (user === null) {
@@ -60,12 +17,15 @@ const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, me
 
   return (
     <div>
-      <TableForm states={createForm.states} header={createForm.header} buttonAction={createForm.buttonAction} buttonLabel={createForm.buttonLabel} messageText={messageText} messageType={messageType}/>
       <h2>blogs</h2>
       <div>
         <span>{user.name} logged in</span>
         <button className="form-btn" onClick={logoutAction}>logout</button>
       </div>
+      <hr/>
+      <Togglable buttonLabel="new note">
+        <TableForm states={createForm.states} header={createForm.header} buttonAction={createForm.buttonAction} buttonLabel={createForm.buttonLabel} messageText={messageText} messageType={messageType}/>
+      </Togglable>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
@@ -83,6 +43,8 @@ const App = () => {
   const [username, setUsername] = useState('') 
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+
+  const createFormRef = React.createRef()
 
   const displayMessage = (text, type, timeout=messageTimeout) => {
     setMessageText(text)
@@ -128,6 +90,7 @@ const App = () => {
 
   const handleCreate = async (event) => {
     event.preventDefault()
+    createFormRef.current.toggleVisibility()
     console.log(`adding new blog with name ${newTitle}, author ${newAuthor}`)
     const newBlogData = {title: newTitle, author: newAuthor, url: newUrl}
     try {
@@ -223,7 +186,7 @@ const App = () => {
     <div className="App">
       <View user={user} blogs={blogs} loginForm={loginForm} logoutAction={handleLogout} createForm={createForm} messageText={messageText} messageType={messageType}/>
     </div>
-  );
+  )
 }
 
 export default App;

@@ -1,6 +1,8 @@
 import React from 'react'
+import '../styles/Blog.css'
+
 const Blog = ({ blog }) => (
-  <div>
+  <div className="Blog">
     {blog.title} {blog.author}
   </div>
 )

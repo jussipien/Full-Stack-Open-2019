@@ -92,6 +92,7 @@ blogsRouter.put('/:id', async (req, res) => {
 
   const id = req.params.id
   const body = req.body
+  const updateType = req.headers.UpdateType
 
   if (!body.title || !body.url) {
     res.status(400).end()
@@ -104,7 +105,7 @@ blogsRouter.put('/:id', async (req, res) => {
 
     const blog = await Blog.findById(id)
 
-    if (blog.user.toString() !== decodedToken.id.toString()) {
+    if (blog.user.toString() !== decodedToken.id.toString() && updateType !== 'addLike') {
       return res.status(401).json({error: 'only the user that added the blog can update it'})
     } 
     

@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from 'react'
+import React, {useState, useEffect} from 'react'
 import Blog from './components/Blog'
 import TableForm from './components/Form'
 import Togglable from './components/Togglable'
@@ -8,7 +8,17 @@ import './App.css'
 
 const messageTimeout = 5000
 
-const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, messageType}) => {
+const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, messageType, setBlogs}) => {
+
+  blogs.sort((a, b) => {return b.likes - a.likes})
+  const blogsView = () => {
+    return (
+      blogs.map(blog =>
+        <Blog key={blog.id} blog={blog} allBlogs={blogs} setBlogs={setBlogs}/>
+      )
+    )
+  }
+
   if (user === null) {
     return (
       <TableForm states={loginForm.states} header={loginForm.header} buttonAction={loginForm.buttonAction} buttonLabel={loginForm.buttonLabel} messageText={messageText} messageType={messageType}/>
@@ -27,7 +37,7 @@ const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, me
         <TableForm states={createForm.states} header={createForm.header} buttonAction={createForm.buttonAction} buttonLabel={createForm.buttonLabel} messageText={messageText} messageType={messageType}/>
       </Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} user={user} blog={blog} allBlogs={blogs} setBlogs={setBlogs}/>
       )}
     </div>
   )
@@ -169,6 +179,7 @@ const App = () => {
   useEffect(() => {
     blogService
       .getAll().then(initialBlogs => {
+        console.log({initialBlogs})
         setBlogs(initialBlogs)
       })
   }, [])
@@ -184,7 +195,7 @@ const App = () => {
 
   return (
     <div className="App">
-      <View user={user} blogs={blogs} loginForm={loginForm} logoutAction={handleLogout} createForm={createForm} messageText={messageText} messageType={messageType}/>
+      <View user={user} blogs={blogs} loginForm={loginForm} logoutAction={handleLogout} createForm={createForm} messageText={messageText} messageType={messageType} setBlogs={setBlogs}/>
     </div>
   )
 }

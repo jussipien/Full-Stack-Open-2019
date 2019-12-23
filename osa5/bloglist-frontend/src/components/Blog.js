@@ -1,4 +1,5 @@
 import React, {useState} from 'react'
+import PropTypes from 'prop-types'
 import blogService from '../services/blogs'
 import '../styles/Blog.css'
 
@@ -51,7 +52,7 @@ const Blog = ({user, blog, allBlogs, setBlogs}) => {
   const userRow = (blog.user) ? <p>added by {blog.user.name}</p> : <></>
   const deleteButton = (blog.user && blog.user.username === user.username) ? <button onClick={handleDelete}>delete</button> : <></>
 
-    return (
+  return (
     <div className="Blog">
       <div onClick={handleDetailToggle}>
         <p>{blog.title} {blog.author}</p>
@@ -64,6 +65,10 @@ const Blog = ({user, blog, allBlogs, setBlogs}) => {
       </div>
     </div>
   )
+}
+
+Blog.propTypes = {
+  blog: PropTypes.object.isRequired,
 }
 
 export default Blog

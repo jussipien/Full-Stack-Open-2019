@@ -9,15 +9,7 @@ import './App.css'
 const messageTimeout = 5000
 
 const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, messageType, setBlogs}) => {
-
   blogs.sort((a, b) => {return b.likes - a.likes})
-  const blogsView = () => {
-    return (
-      blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} allBlogs={blogs} setBlogs={setBlogs}/>
-      )
-    )
-  }
 
   if (user === null) {
     return (
@@ -60,7 +52,7 @@ const App = () => {
     setMessageText(text)
     setMessageType(type)
     setTimeout(() => {
-    setMessageText('')
+      setMessageText('')
     }, timeout)
   }
 
@@ -200,4 +192,4 @@ const App = () => {
   )
 }
 
-export default App;
+export default App

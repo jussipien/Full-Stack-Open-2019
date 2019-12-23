@@ -21,14 +21,14 @@ const TableForm = ({states, header, buttonAction, buttonLabel, messageText, mess
     <section>
       <h2>{header}</h2>
       <Message text={messageText} type={messageType}/>
-        <form>
-          <table>
-            <tbody>
-              {getStateRows()}
-            </tbody>
-          </table>
-          <button className="form-btn" onClick={buttonAction}>{buttonLabel}</button>
-        </form>
+      <form>
+        <table>
+          <tbody>
+            {getStateRows()}
+          </tbody>
+        </table>
+        <button className="form-btn" onClick={buttonAction}>{buttonLabel}</button>
+      </form>
     </section>
   )
 }

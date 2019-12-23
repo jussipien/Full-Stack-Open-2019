@@ -54,10 +54,10 @@ const Blog = ({user, blog, allBlogs, setBlogs}) => {
 
   return (
     <div className="Blog">
-      <div onClick={handleDetailToggle}>
+      <div className="blog-min" onClick={handleDetailToggle}>
         <p>{blog.title} {blog.author}</p>
       </div>
-      <div style={detailsStyle}>
+      <div className="blog-detailed" style={detailsStyle}>
         <p>{blog.url}</p>
         <p>{blog.likes} likes <button onClick={handleLike}>like</button></p>
         {userRow}

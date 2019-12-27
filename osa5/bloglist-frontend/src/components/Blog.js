@@ -27,6 +27,11 @@ const Blog = ({user, blog, allBlogs, setBlogs}) => {
       likes: blog.likes + 1
     }
 
+    console.log({blogObject})
+
+    // update with type addLike in header updateType; backend in part 4 modified to
+    // make updating possible by any logged in user when updateType is addLike;
+    // not very secure for real use
     let updatedBlog = await blogService.updateBlog(blog.id, blogObject, 'addLike')
     console.log({updatedBlog})
     updatedBlog.user = blogUser
@@ -49,16 +54,16 @@ const Blog = ({user, blog, allBlogs, setBlogs}) => {
     }
   }
 
-  const userRow = (blog.user) ? <p>added by {blog.user.name}</p> : <></>
+  const userRow = (blog.user) ? <p>added by <b>{blog.user.name}</b></p> : <></>
   const deleteButton = (blog.user && blog.user.username === user.username) ? <button onClick={handleDelete}>delete</button> : <></>
 
   return (
     <div className="Blog">
       <div className="blog-min" onClick={handleDetailToggle}>
-        <p>{blog.title} {blog.author}</p>
+        <p>{blog.title} <b>{blog.author}</b></p>
       </div>
       <div className="blog-detailed" style={detailsStyle}>
-        <p>{blog.url}</p>
+        <a href={blog.url}>{blog.url}</a>
         <p>{blog.likes} likes <button onClick={handleLike}>like</button></p>
         {userRow}
         {deleteButton}

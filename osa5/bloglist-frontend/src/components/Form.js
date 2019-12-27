@@ -1,26 +1,25 @@
 import React from 'react'
-import Message from './Message'
 
-const FormRow = ({label, type, value, onChange}) => {
+const FormRow = ({label, state}) => {
+
   return (
     <tr>
       <td>
         <label htmlFor={label}>{label}:</label> 
       </td>
       <td>
-        <input type={type} id={label} onChange={onChange} value={value} required={true}/>
+        <input {...state} id={label} required={true}/>
       </td>
     </tr>
   )
 }
   
-const TableForm = ({states, header, buttonAction, buttonLabel, messageText, messageType}) => {
-  const getStateRows = () => states.map(state => <FormRow key={state.id} label={state.label} type={state.type} value={state.value} onChange={state.onChange}/>)
+const TableForm = ({states, header, buttonAction, buttonLabel}) => {
+  const getStateRows = () => states.map(state => <FormRow key={state.id} state={state.state} label={state.label}/>)
 
   return (
     <section>
       <h2>{header}</h2>
-      <Message text={messageText} type={messageType}/>
       <form>
         <table>
           <tbody>

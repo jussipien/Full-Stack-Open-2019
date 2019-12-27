@@ -41,7 +41,7 @@ blogsRouter.post('/', async (req, res) => {
       blog.likes = 0
     }
   
-    const savedBlog = await blog.save()
+    let savedBlog = await blog.save()
 
     delete user._id
     // console.log(user)
@@ -49,8 +49,10 @@ blogsRouter.post('/', async (req, res) => {
     user.blogs = blogs
     // await User.findByIdAndUpdate(user._id, user)
     await user.save()
-    // console.log(user)
-    return res.status(201).json(savedBlog)
+    
+    const populatedBlog = await savedBlog.populate('user', {username: 1, name: 1, id: 1}).execPopulate()
+
+    return res.status(201).json(populatedBlog)
   } catch { (error) => 
     next(error)
   }
@@ -89,15 +91,17 @@ blogsRouter.put('/:id', async (req, res) => {
     if (!req.token) {
       return res.status(401).json({error: 'token missing or invalid'})
     }
+    
+    const id = req.params.id
+    const body = req.body
+    const updateType = req.headers.updatetype
 
-  const id = req.params.id
-  const body = req.body
-  const updateType = req.headers.UpdateType
-
-  if (!body.title || !body.url) {
-    res.status(400).end()
-  }
-
+    console.log(updateType)
+    
+    if (!body.title || !body.url) {
+      res.status(400).end()
+    }
+    
     const decodedToken = jwt.verify(req.token, config.SECRET)
     if (!decodedToken.id) {
       return res.status(401).json({error: 'token missing or invalid'})
@@ -107,11 +111,12 @@ blogsRouter.put('/:id', async (req, res) => {
 
     if (blog.user.toString() !== decodedToken.id.toString() && updateType !== 'addLike') {
       return res.status(401).json({error: 'only the user that added the blog can update it'})
-    } 
+    }
     
     const updated = await Blog.findByIdAndUpdate(id, body, {new: true} )
 
     return res.status(200).json(updated.toJSON())
+
   } catch { (error) =>
     next(error)
       // res.status(404).json({'error': 'no blog found with given id'})

@@ -1,11 +1,14 @@
 import React, {useState, useEffect} from 'react'
+import {useField} from './hooks'
 import Blog from './components/Blog'
 import TableForm from './components/Form'
 import Togglable from './components/Togglable'
+import Message from './components/Message'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import './App.css'
 
+const createFormRef = React.createRef()
 const messageTimeout = 5000
 
 const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, messageType, setBlogs}) => {
@@ -13,7 +16,10 @@ const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, me
 
   if (user === null) {
     return (
-      <TableForm states={loginForm.states} header={loginForm.header} buttonAction={loginForm.buttonAction} buttonLabel={loginForm.buttonLabel} messageText={messageText} messageType={messageType}/>
+      <div>
+        <TableForm states={loginForm.states} header={loginForm.header} buttonAction={loginForm.buttonAction} buttonLabel={loginForm.buttonLabel} messageText={messageText} messageType={messageType}/>
+        <Message text={messageText} type={messageType}/>
+      </div>
     )
   }
 
@@ -25,8 +31,8 @@ const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, me
         <button className="form-btn" onClick={logoutAction}>logout</button>
       </div>
       <hr/>
-      <Togglable buttonLabel="new note">
-        <TableForm states={createForm.states} header={createForm.header} buttonAction={createForm.buttonAction} buttonLabel={createForm.buttonLabel} messageText={messageText} messageType={messageType}/>
+      <Togglable buttonLabel="new note" messageText={messageText} messageType={messageType} ref={createFormRef}>
+        <TableForm states={createForm.states} header={createForm.header} buttonAction={createForm.buttonAction} buttonLabel={createForm.buttonLabel}/>
       </Togglable>
       {blogs.map(blog =>
         <Blog key={blog.id} user={user} blog={blog} allBlogs={blogs} setBlogs={setBlogs}/>
@@ -37,16 +43,14 @@ const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, me
 
 const App = () => {
   const [blogs, setBlogs] = useState([]) 
-  const [newTitle, setNewTitle] = useState('')
-  const [newAuthor, setNewAuthor] = useState('')
-  const [newUrl, setNewUrl] = useState('')
   const [messageText, setMessageText] = useState('')
   const [messageType, setMessageType] = useState('')
-  const [username, setUsername] = useState('') 
-  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-
-  const createFormRef = React.createRef()
+  const newTitle = useField('text')
+  const newAuthor = useField('text')
+  const newUrl = useField('text')
+  const username = useField('text')
+  const password = useField('password')
 
   const displayMessage = (text, type, timeout=messageTimeout) => {
     setMessageText(text)
@@ -56,18 +60,18 @@ const App = () => {
     }, timeout)
   }
 
-  const changeUsername = (event) => setUsername(event.target.value)
-  const changePassword = (event) => setPassword(event.target.value)
+  // const changeUsername = (event) => setUsername(event.target.value)
+  // const changePassword = (event) => setPassword(event.target.value)
 
-  const changeTitle = (event) => setNewTitle(event.target.value)
-  const changeAuthor = (event) => setNewAuthor(event.target.value)
-  const changeUrl = (event) => setNewUrl(event.target.value)
+  // const changeTitle = (event) => setNewTitle(event.target.value)
+  // const changeAuthor = (event) => setNewAuthor(event.target.value)
+  // const changeUrl = (event) => setNewUrl(event.target.value)
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    console.log('logging in with', username, password)
+    console.log('logging in with', username.value, password.value)
     try {
-      const user = await loginService.login(username, password)
+      const user = await loginService.login(username.value, password.value)
       console.log(user)
       setUser(user)
       window.localStorage.setItem(
@@ -75,8 +79,8 @@ const App = () => {
       ) 
       blogService.setToken(user.token)
       displayMessage('login successful!', 'success')
-      setUsername('')
-      setPassword('')
+      username.reset()
+      password.reset()
     } catch (error) {
       console.log(error.response.data.error)
       displayMessage(error.response.data.error, 'error')
@@ -88,20 +92,21 @@ const App = () => {
     console.log('logging out')
     setUser(null)
     window.localStorage.removeItem('bloglistLoginData')
+    displayMessage('logged out successfully', 'success')
   }
 
   const handleCreate = async (event) => {
     event.preventDefault()
     createFormRef.current.toggleVisibility()
-    console.log(`adding new blog with name ${newTitle}, author ${newAuthor}`)
-    const newBlogData = {title: newTitle, author: newAuthor, url: newUrl}
+    console.log(`adding new blog with name ${newTitle.value}, author ${newAuthor.value}`)
+    const newBlogData = {title: newTitle.value, author: newAuthor.value, url: newUrl.value, user: user.token}
     try {
       const blog = await blogService.createBlog(newBlogData)
       setBlogs(blogs.concat(blog))
       displayMessage(`a new blog ${blog.title} by ${blog.author} added`, 'success')
-      setNewTitle('')
-      setNewAuthor('')
-      setNewUrl('')
+      newTitle.reset()
+      newAuthor.reset()
+      newUrl.reset()
     } catch (error) {
       if (error.status === 401) {
         console.log({error})
@@ -113,23 +118,21 @@ const App = () => {
     }
   }
 
+  // props for login form rows
   const loginFormStates = [
     {
       label: 'username',
-      type: 'text',
-      value: username,
-      onChange: changeUsername,
+      state: username,
       id: 1
     },
     {
       label: 'password',
-      type: 'password',
-      value: password,
-      onChange: changePassword,
+      state: password,
       id: 2
     }
   ]
 
+  // props for login form
   const loginForm = {
     states: loginFormStates,
     header: 'Log in to application',
@@ -137,30 +140,26 @@ const App = () => {
     buttonLabel: 'login'
   }
   
+  // props for create form rows
   const createFormStates = [
     {
       label: 'title',
-      type: 'text',
-      value: newTitle,
-      onChange: changeTitle,
+      state: newTitle,
       id: 1
     },
     {
       label: 'author',
-      type: 'text',
-      value: newAuthor,
-      onChange: changeAuthor,
+      state: newAuthor,
       id: 2
     },
     {
       label: 'url',
-      type: 'text',
-      value: newUrl,
-      onChange: changeUrl,
+      state: newUrl,
       id: 3
     }
   ]
 
+  // props for create form
   const createForm = {
     states: createFormStates,
     header: 'Add new blog',
@@ -168,6 +167,7 @@ const App = () => {
     buttonLabel: 'add'
   }
 
+  // get blogs from database when app is loaded
   useEffect(() => {
     blogService
       .getAll().then(initialBlogs => {
@@ -176,6 +176,7 @@ const App = () => {
       })
   }, [])
 
+  // get login information from local storage when app is loaded
   useEffect(() => {
     const userJSON = window.localStorage.getItem('bloglistLoginData')
     if (userJSON) {

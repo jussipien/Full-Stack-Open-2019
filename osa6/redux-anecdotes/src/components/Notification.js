@@ -1,7 +1,8 @@
 import React from 'react'
+import {connect} from 'react-redux'
 
-const Notification = ({store}) => {
-  const message = store.getState().notification
+const Notification = (props) => {
+  const message = props.notification
 
   const style = {
     border: 'solid',
@@ -17,4 +18,13 @@ const Notification = ({store}) => {
     : <></>
 }
 
-export default Notification
+const mapStateToProps = (state) => {
+  console.log(state)
+  return {
+    notification: state.notification
+  }
+}
+
+const ConnectedNotification = connect(mapStateToProps)(Notification)
+
+export default ConnectedNotification

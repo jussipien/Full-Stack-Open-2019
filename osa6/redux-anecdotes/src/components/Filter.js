@@ -1,13 +1,14 @@
 import React from 'react'
+import {connect} from 'react-redux'
 import {changeFilter, clearFilter} from '../reducers/filterReducer'
 
 const Filter = (props) => {
   const handleChange = (event) => {
-    props.store.dispatch(changeFilter(event.target.value))
+    props.changeFilter(event.target.value)
   }
 
   const handleClear = () => {
-    props.store.dispatch(clearFilter())
+    props.clearFilter()
     document.getElementsByName('filter')[0].value = ''
   }
 
@@ -25,4 +26,21 @@ const Filter = (props) => {
   )
 }
 
-export default Filter
+const mapStateToProps = (state) => {
+  console.log(state)
+  return {
+    filter: state.filter
+  }
+}
+
+const mapDispatchToProps = {
+  changeFilter,
+  clearFilter
+}
+
+const ConnectedAnecdoteList = connect(
+  mapStateToProps,
+  mapDispatchToProps
+  )(Filter)
+
+export default ConnectedAnecdoteList

@@ -4,8 +4,6 @@ import {handleVote} from '../reducers/anecdoteReducer'
 import {changeMessage, clearMessage} from '../reducers/notificationReducer'
 
 const AnecdoteList = (props) => {
-  console.log(props.filter)
-
   const vote = (id, content) => {
     props.handleVote(id)
     props.changeMessage(`you voted '${content}'`)

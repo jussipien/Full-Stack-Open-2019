@@ -9,6 +9,7 @@ const AnecdoteForm = (props) => {
   const addAnecdote = (event) => {
     event.preventDefault()
     const content = event.target.text.value
+    console.log({content})
     props.createAnecdote(content)
     anecdoteService.post(content)
     event.target.text.value = ''

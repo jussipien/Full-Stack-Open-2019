@@ -31,8 +31,12 @@
       "votes": 0
     },
     {
-      "content": "testpost",
-      "id": "52275",
+      "content": {
+        "content": "dasa",
+        "id": "30720",
+        "votes": 0
+      },
+      "id": "28284",
       "votes": 0
     }
   ]

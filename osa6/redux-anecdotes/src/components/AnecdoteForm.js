@@ -6,13 +6,13 @@ import anecdoteService from '../services/anecdotes'
 
 const AnecdoteForm = (props) => {
 
-  const addAnecdote = (event) => {
+  const addAnecdote = async (event) => {
     event.preventDefault()
     const content = event.target.text.value
-    console.log({content})
-    props.createAnecdote(content)
-    anecdoteService.post(content)
     event.target.text.value = ''
+    console.log({content})
+    const newAnecdote = await anecdoteService.post(content)
+    props.createAnecdote(newAnecdote)
     props.changeMessage(`you added anecdote '${content}'`)
     setTimeout(() => {
       props.clearMessage()

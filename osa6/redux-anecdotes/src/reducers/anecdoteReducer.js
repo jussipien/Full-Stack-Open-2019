@@ -7,15 +7,15 @@
 //   'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
 // ]
 
-const getId = () => (100000 * Math.random()).toFixed(0)
+// const getId = () => (100000 * Math.random()).toFixed(0)
 
-const asObject = (anecdote) => {
-  return {
-    content: anecdote,
-    id: getId(),
-    votes: 0
-  }
-}
+// const asObject = (anecdote) => {
+//   return {
+//     content: anecdote,
+//     id: getId(),
+//     votes: 0
+//   }
+// }
 
 export const handleVote = (id) => {
   console.log('vote', id)
@@ -27,22 +27,21 @@ export const handleVote = (id) => {
   }  
 }
 
-export const createAnecdote = (content) => {
+export const createAnecdote = (anecdoteObject) => {
   return {
     type: 'CREATE',
     data: {
-      content: content
+      anecdoteObject: anecdoteObject
     }
   }
 }
 
 const anecdoteReducer = (state = [], action) => {
-  console.log('state now: ', state)
-  console.log('action', action)
   let stateCopy
   switch (action.type) {
     case 'CREATE':
-      const newAnecdote = asObject(action.data.content)
+      const newAnecdote = action.data.anecdoteObject
+      console.log({newAnecdote})
       stateCopy = [...state, newAnecdote]
       return stateCopy
     case 'VOTE':

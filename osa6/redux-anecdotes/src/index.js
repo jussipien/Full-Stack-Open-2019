@@ -18,7 +18,7 @@ const store = createStore(reducer)
 
 anecdoteService.getAll().then(anecdotes =>
   anecdotes.forEach(anecdote => {
-    store.dispatch({ type: 'CREATE', data: anecdote })
+    store.dispatch({type: 'CREATE', data: {anecdoteObject: anecdote}})
   })
 )
 

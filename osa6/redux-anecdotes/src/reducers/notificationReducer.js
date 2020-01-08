@@ -1,18 +1,32 @@
-export const changeMessage = (message) => {
-  console.log('change notification message', message)
-  return {
-    type: 'CHANGE_MESSAGE',
-    data: {
-      message: message
-    }
-  }  
-}
+// const changeMessage = (message) => {
+//   console.log('change notification message', message)
+//   return {
+//     type: 'CHANGE_MESSAGE',
+//     data: {
+//       message: message
+//     }
+//   }  
+// }
 
-export const clearMessage = () => {
-  console.log('clear notification message')
-  return {
-    type: 'CLEAR_MESSAGE'
-  }  
+// const clearMessage = () => {
+//   console.log('clear notification message')
+//   return {
+//     type: 'CLEAR_MESSAGE'
+//   }  
+// }
+
+export const setNotification = (message, seconds) => {
+  return async dispatch => {
+    dispatch({
+      type: 'CHANGE_MESSAGE',
+      data: message
+    })
+    setTimeout(() => {
+      dispatch({
+        type: 'CLEAR_MESSAGE'
+        })
+    }, seconds*1000)
+  }
 }
 
 const notificationReducer = (state = '', action) => {
@@ -21,7 +35,7 @@ const notificationReducer = (state = '', action) => {
   
   switch (action.type) {
     case 'CHANGE_MESSAGE':
-      return action.data.message
+      return action.data
     case 'CLEAR_MESSAGE':
       return ''
     default: return state

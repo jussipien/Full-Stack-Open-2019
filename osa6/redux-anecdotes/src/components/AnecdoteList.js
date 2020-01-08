@@ -1,15 +1,12 @@
 import React from 'react'
 import {connect} from 'react-redux'
 import {handleVote} from '../reducers/anecdoteReducer'
-import {changeMessage, clearMessage} from '../reducers/notificationReducer'
+import {setNotification} from '../reducers/notificationReducer'
 
 const AnecdoteList = (props) => {
-  const vote = (id, content) => {
-    props.handleVote(id)
-    props.changeMessage(`you voted '${content}'`)
-    setTimeout(() => {
-      props.clearMessage()
-    }, 5000)
+  const vote = async (anecdote) => {
+    props.handleVote(anecdote)
+    props.setNotification(`you voted '${anecdote.content}'`, 5)
   }
 
   return (
@@ -21,7 +18,7 @@ const AnecdoteList = (props) => {
         </div>
         <div>
           has {anecdote.votes} votes
-          <button onClick={() => vote(anecdote.id, anecdote.content)}>vote</button>
+          <button onClick={() => vote(anecdote)}>vote</button>
         </div>
       </div>
     )}
@@ -46,8 +43,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   handleVote,
-  changeMessage,
-  clearMessage
+  setNotification
 }
 
 const ConnectedAnecdoteList = connect(

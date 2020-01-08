@@ -1,3 +1,5 @@
+import anecdoteService from '../services/anecdotes'
+
 // const anecdotesAtStart = [
 //   'If it hurts, do it more often',
 //   'Adding manpower to a late software project makes it later!',
@@ -17,30 +19,43 @@
 //   }
 // }
 
-export const handleVote = (id) => {
-  console.log('vote', id)
-  return {
-    type: 'VOTE',
-    data: {
-      id: id
-    }
-  }  
+export const initializeAnecdotes = (anecdotes) => {
+  return async dispatch => {
+    const anecdotes = await anecdoteService.getAll()
+    dispatch({
+      type: 'INIT_ANECDOTES',
+      data: anecdotes,
+    })
+  }
 }
 
-export const createAnecdote = (anecdoteObject) => {
-  return {
-    type: 'CREATE',
-    data: {
-      anecdoteObject: anecdoteObject
-    }
+export const handleVote = anecdoteObject => {
+  return async dispatch => {
+    const votedAnecdote = await anecdoteService.addVote(anecdoteObject.id, anecdoteObject)
+    dispatch({
+      type: 'VOTE',
+      data: votedAnecdote
+    }) 
+  }
+}
+
+export const createAnecdote = content => {
+  return async dispatch => {
+    const newAnecdote = await anecdoteService.createNew(content)
+    dispatch({
+      type: 'CREATE',
+      data: newAnecdote
+    })
   }
 }
 
 const anecdoteReducer = (state = [], action) => {
   let stateCopy
   switch (action.type) {
+    case 'INIT_ANECDOTES':
+      return action.data
     case 'CREATE':
-      const newAnecdote = action.data.anecdoteObject
+      const newAnecdote = action.data
       console.log({newAnecdote})
       stateCopy = [...state, newAnecdote]
       return stateCopy
@@ -49,10 +64,7 @@ const anecdoteReducer = (state = [], action) => {
       console.log(index)
       if (index !== -1) {
         stateCopy = [...state]
-        let voted = stateCopy[index]
-        voted.votes++
-        console.log({voted})
-        stateCopy[index] = voted
+        stateCopy[index] = action.data
         return stateCopy
       }
       return state

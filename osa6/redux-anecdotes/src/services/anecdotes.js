@@ -17,13 +17,19 @@ const getAll = async () => {
   return res.data
 }
 
-const post = async (anecdote) => {
+const createNew = async (anecdote) => {
   console.log({anecdote})
   const object = asObject(anecdote)
   console.log({object})
   const res = await axios.post(baseUrl, object)
-  console.log(res.data)
   return res.data
 }
 
-export default {getAll, post}
+const addVote = async (id, anecdote) => {
+  anecdote.votes++
+  console.log({anecdote})
+  axios.put(`${baseUrl}/${id}`, anecdote)
+  return anecdote
+}
+
+export default {getAll, createNew, addVote}

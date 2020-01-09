@@ -1,0 +1,18 @@
+.Message {
+  font-size: 2em;
+  border-style: solid;
+  border-width: 4px;
+  border-radius: 20px;
+}
+
+.success {
+  color: #027D02;
+  border-color: #027d02;
+  background-color: #cef5ce;
+}
+
+.error {
+  color: #FF0202;
+  border-color: #FF0202;
+  background-color: #FFEFEF;
+}

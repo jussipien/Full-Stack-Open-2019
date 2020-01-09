@@ -6,14 +6,14 @@ export const initializeBlogs = (blogs) => {
     const blogs = await blogService.getAll()
     dispatch({
       type: 'INIT_BLOGS',
-      data: anecdotes,
+      data: blogs,
     })
   }
 }
 
 export const handleLike = blogObject => {
   return async dispatch => {
-    const likedBlog = await blogService.update(anecdoteObject.id, anecdoteObject, 'addLike')
+    const likedBlog = await blogService.update(blogObject.id, blogObject, 'addLike')
     dispatch({
       type: 'LIKE',
       data: likedBlog
@@ -38,7 +38,7 @@ const blogReducer = (state = [], action) => {
       return action.data
     case 'CREATE':
       const newBlog = action.data
-      console.log({newAnenewBlogcdote})
+      console.log({newBlog})
       stateCopy = [...state, newBlog]
       return stateCopy
     case 'LIKE':

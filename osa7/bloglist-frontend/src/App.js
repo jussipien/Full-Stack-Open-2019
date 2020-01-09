@@ -1,18 +1,20 @@
 import React, {useState, useEffect} from 'react'
+import {connect} from 'react-redux'
 import {useField} from './hooks'
 import Blog from './components/Blog'
 import TableForm from './components/Form'
 import Togglable from './components/Togglable'
-import Message from './components/Message'
-import notificationReducer from './reducers/notificationReducer'
+import Notification from './components/Notification'
+import {setNotification}  from './reducers/notificationReducer'
 import {initializeBlogs} from './reducers/blogReducer'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import './App.css'
+import { checkPropTypes } from 'prop-types'
 
 
 const createFormRef = React.createRef()
-const messageTimeout = 5000
+const messageTimeout = 5
 
 const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, messageType, setBlogs}) => {
   blogs.sort((a, b) => {return b.likes - a.likes})
@@ -21,7 +23,7 @@ const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, me
     return (
       <div>
         <TableForm states={loginForm.states} header={loginForm.header} buttonAction={loginForm.buttonAction} buttonLabel={loginForm.buttonLabel} messageText={messageText} messageType={messageType}/>
-        <Message text={messageText} type={messageType}/>
+        <Notification/>
       </div>
     )
   }
@@ -44,10 +46,8 @@ const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, me
   )
 }
 
-const App = () => {
+const App = (props) => {
   const [blogs, setBlogs] = useState([]) 
-  const [messageText, setMessageText] = useState('')
-  const [messageType, setMessageType] = useState('')
   const [user, setUser] = useState(null)
   const newTitle = useField('text')
   const newAuthor = useField('text')
@@ -55,12 +55,8 @@ const App = () => {
   const username = useField('text')
   const password = useField('password')
 
-  const displayMessage = (text, type, timeout=messageTimeout) => {
-    setMessageText(text)
-    setMessageType(type)
-    setTimeout(() => {
-      setMessageText('')
-    }, timeout)
+  const displayNotification = async (text, type, timeout=messageTimeout) => {
+    props.setNotification(text, type, timeout)
   }
 
   // const changeUsername = (event) => setUsername(event.target.value)
@@ -81,12 +77,12 @@ const App = () => {
         'bloglistLoginData', JSON.stringify(user)
       ) 
       blogService.setToken(user.token)
-      displayMessage('login successful!', 'success')
+      ('login successful!', 'success')
       username.reset()
       password.reset()
     } catch (error) {
-      console.log(error.response.data.error)
-      displayMessage(error.response.data.error, 'error')
+      console.log(error.response)
+      displayNotification(error.response, 'error')
     }
   }
 
@@ -95,7 +91,7 @@ const App = () => {
     console.log('logging out')
     setUser(null)
     window.localStorage.removeItem('bloglistLoginData')
-    displayMessage('logged out successfully', 'success')
+    displayNotification('logged out successfully', 'success')
   }
 
   const handleCreate = async (event) => {
@@ -106,17 +102,17 @@ const App = () => {
     try {
       const blog = await blogService.createBlog(newBlogData)
       setBlogs(blogs.concat(blog))
-      displayMessage(`a new blog ${blog.title} by ${blog.author} added`, 'success')
+      displayNotification(`a new blog ${blog.title} by ${blog.author} added`, 'success')
       newTitle.reset()
       newAuthor.reset()
       newUrl.reset()
     } catch (error) {
       if (error.status === 401) {
         console.log({error})
-        displayMessage({error}, 'error')
+        displayNotification({error}, 'error')
       } else {
         console.log(error.response.data.error)
-        displayMessage(error.response.data.error.message, 'error')
+        displayNotification(error.response.data.error.message, 'error')
       }
     }
   }
@@ -189,11 +185,15 @@ const App = () => {
     }
   }, [])
 
+  const mapDispatchToProps = {
+    setNotification
+  }
+
   return (
     <div className="App">
-      <View user={user} blogs={blogs} loginForm={loginForm} logoutAction={handleLogout} createForm={createForm} messageText={messageText} messageType={messageType} setBlogs={setBlogs}/>
+      <View user={user} blogs={blogs} loginForm={loginForm} logoutAction={handleLogout} createForm={createForm} setBlogs={setBlogs}/>
     </div>
   )
 }
 
-export default App
+export default connect(null, {setNotification})(App)

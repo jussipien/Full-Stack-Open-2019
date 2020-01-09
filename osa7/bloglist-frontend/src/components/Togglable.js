@@ -1,5 +1,5 @@
 import React, {useState, useImperativeHandle} from 'react'
-import Message from './Message'
+import Notification from './Notification'
 import PropTypes from 'prop-types'
 
 const Togglable = React.forwardRef((props, ref) => {
@@ -20,7 +20,7 @@ const Togglable = React.forwardRef((props, ref) => {
   
   return (
     <div>
-      <Message text={props.messageText} type={props.messageType}/>
+      <Notification text={props.messageText} type={props.messageType}/>
       <div style={hideWhenVisible}>
         <button onClick={toggleVisibility}>{props.buttonLabel}</button>
       </div>

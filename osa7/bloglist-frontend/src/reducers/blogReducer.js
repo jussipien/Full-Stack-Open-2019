@@ -1,6 +1,5 @@
 import blogService from '../services/blogs'
 
-
 export const initializeBlogs = (blogs) => {
   return async dispatch => {
     const blogs = await blogService.getAll()
@@ -8,16 +7,6 @@ export const initializeBlogs = (blogs) => {
       type: 'INIT_BLOGS',
       data: blogs,
     })
-  }
-}
-
-export const handleLike = blogObject => {
-  return async dispatch => {
-    const likedBlog = await blogService.update(blogObject.id, blogObject, 'addLike')
-    dispatch({
-      type: 'LIKE',
-      data: likedBlog
-    }) 
   }
 }
 
@@ -31,8 +20,29 @@ export const createBlog = content => {
   }
 }
 
+export const deleteBlog = id => {
+  return async dispatch => {
+    await blogService.deleteBlog(id)
+    dispatch({
+      type: 'DELETE',
+      data: id
+    })
+  }
+}
+
+export const addLike = blogObject => {
+  return async dispatch => {
+    const likedBlog = await blogService.update(blogObject.id, blogObject, 'addLike')
+    dispatch({
+      type: 'LIKE',
+      data: likedBlog
+    }) 
+  }
+}
+
 const blogReducer = (state = [], action) => {
   let stateCopy
+  let index
   switch (action.type) {
     case 'INIT_BLOGS':
       return action.data
@@ -41,8 +51,15 @@ const blogReducer = (state = [], action) => {
       console.log({newBlog})
       stateCopy = [...state, newBlog]
       return stateCopy
+    case 'DELETE':
+      index = state.findIndex(object => object.id === action.data)
+      if (index !== -1) {
+        stateCopy = [...state]
+        stateCopy.splice(index, 1)
+        return stateCopy
+      }
     case 'LIKE':
-      const index = state.findIndex(object => object.id === action.data.id)
+      index = state.findIndex(object => object.id === action.data.id)
       console.log(index)
       if (index !== -1) {
         stateCopy = [...state]

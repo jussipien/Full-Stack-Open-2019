@@ -6,7 +6,7 @@ import TableForm from './components/Form'
 import Togglable from './components/Togglable'
 import Notification from './components/Notification'
 import {setNotification}  from './reducers/notificationReducer'
-import {initializeBlogs} from './reducers/blogReducer'
+import {initializeBlogs, createBlog} from './reducers/blogReducer'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import './App.css'
@@ -16,7 +16,7 @@ import { checkPropTypes } from 'prop-types'
 const createFormRef = React.createRef()
 const messageTimeout = 5
 
-const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, messageType, setBlogs}) => {
+const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, messageType}) => {
   blogs.sort((a, b) => {return b.likes - a.likes})
 
   if (user === null) {
@@ -40,14 +40,13 @@ const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, me
         <TableForm states={createForm.states} header={createForm.header} buttonAction={createForm.buttonAction} buttonLabel={createForm.buttonLabel}/>
       </Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} user={user} blog={blog} allBlogs={blogs} setBlogs={setBlogs}/>
+        <Blog key={blog.id} user={user} blog={blog} allBlogs={blogs}/>
       )}
     </div>
   )
 }
 
 const App = (props) => {
-  const [blogs, setBlogs] = useState([]) 
   const [user, setUser] = useState(null)
   const newTitle = useField('text')
   const newAuthor = useField('text')
@@ -100,8 +99,7 @@ const App = (props) => {
     console.log(`adding new blog with name ${newTitle.value}, author ${newAuthor.value}`)
     const newBlogData = {title: newTitle.value, author: newAuthor.value, url: newUrl.value, user: user.token}
     try {
-      const blog = await blogService.createBlog(newBlogData)
-      setBlogs(blogs.concat(blog))
+      const blog = await props.createBlog(newBlogData)
       displayNotification(`a new blog ${blog.title} by ${blog.author} added`, 'success')
       newTitle.reset()
       newAuthor.reset()
@@ -167,13 +165,13 @@ const App = (props) => {
   }
 
   // get blogs from database when app is loaded
-  useEffect(() => {
-    blogService
-      .getAll().then(initialBlogs => {
-        console.log({initialBlogs})
-        setBlogs(initialBlogs)
-      })
-  }, [])
+  // useEffect(() => {
+  //   blogService
+  //     .getAll().then(initialBlogs => {
+  //       console.log({initialBlogs})
+  //       setBlogs(initialBlogs)
+  //     })
+  // }, [])
 
   // get login information from local storage when app is loaded
   useEffect(() => {
@@ -185,15 +183,23 @@ const App = (props) => {
     }
   }, [])
 
-  const mapDispatchToProps = {
-    setNotification
-  }
-
   return (
     <div className="App">
-      <View user={user} blogs={blogs} loginForm={loginForm} logoutAction={handleLogout} createForm={createForm} setBlogs={setBlogs}/>
+      <View user={user} loginForm={loginForm} logoutAction={handleLogout} createForm={createForm}/>
     </div>
   )
 }
 
-export default connect(null, {setNotification})(App)
+const mapStateToProps = (state) => {
+  console.log(state)
+  return {
+    blogs: state.blogs
+  }
+}
+
+const mapDispatchToProps = {
+  createBlog,
+  setNotification
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)

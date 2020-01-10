@@ -1,9 +1,12 @@
 import React, {useState} from 'react'
+import {connect} from 'react-redux'
 import PropTypes from 'prop-types'
+import {addLike, deleteBlog} from '../reducers/blogReducer'
 import blogService from '../services/blogs'
 import '../styles/Blog.css'
 
-const Blog = ({user, blog, allBlogs, setBlogs}) => {
+const Blog = (props) => {
+  const blog = props.blog
   const [viewDetails, setViewDetails] = useState(false)
   const detailsStyle = {display: viewDetails ? '' : 'none'}
 
@@ -12,10 +15,8 @@ const Blog = ({user, blog, allBlogs, setBlogs}) => {
   }
 
   const handleLike = async () => { 
-    let allBlogsCopy = [...allBlogs]
-    const index = allBlogs.findIndex(b => b.id === blog.id)
-
-    console.log({index})
+    // let allBlogsCopy = [...allBlogs]
+    // const index = allBlogs.findIndex(b => b.id === blog.id)
 
     let blogUser = (blog.user) ? blog.user : null
 
@@ -32,30 +33,25 @@ const Blog = ({user, blog, allBlogs, setBlogs}) => {
     // update with type addLike in header updateType; backend in part 4 modified to
     // make updating possible by any logged in user when updateType is addLike;
     // not very secure for real use
-    let updatedBlog = await blogService.updateBlog(blog.id, blogObject, 'addLike')
-    console.log({updatedBlog})
-    updatedBlog.user = blogUser
-    console.log({updatedBlog})
-    allBlogsCopy[index] = updatedBlog
-    console.log({allBlogsCopy})
-    setBlogs(allBlogsCopy)
+    props.addLike(blogObject)
   }
 
   const handleDelete = async () => {
     if (window.confirm(`remove blog ${blog.title} by ${blog.author}`)) {
-      let allBlogsCopy = [...allBlogs]
-      const index = allBlogs.findIndex(b => b.id === blog.id)
-      const res = await blogService.deleteBlog(blog.id)
-      if (res.status === 204) {
-        allBlogsCopy.splice(index, 1)
-        setBlogs(allBlogsCopy)
-        console.log(`successfully deleted blog with id ${blog.id}`)
-      }
+      props.deleteBlog(blog.id)
+      // let allBlogsCopy = [...allBlogs]
+      // const index = allBlogs.findIndex(b => b.id === blog.id)
+      // const res = await blogService.deleteBlog(blog.id)
+      // if (res.status === 204) {
+      //   allBlogsCopy.splice(index, 1)
+      //   setBlogs(allBlogsCopy)
+      //   console.log(`successfully deleted blog with id ${blog.id}`)
+      // }
     }
   }
 
   const userRow = (blog.user) ? <p>added by <b>{blog.user.name}</b></p> : <></>
-  const deleteButton = (blog.user && blog.user.username === user.username) ? <button onClick={handleDelete}>delete</button> : <></>
+  const deleteButton = (blog.user && blog.user.username === props.user.username) ? <button onClick={handleDelete}>delete</button> : <></>
 
   return (
     <div className="Blog">
@@ -72,8 +68,25 @@ const Blog = ({user, blog, allBlogs, setBlogs}) => {
   )
 }
 
+const mapStateToProps = (state) => {
+  console.log(state)
+  return {
+    blogs: state.blogs
+  }
+}
+
+const mapDispatchToProps = {
+  addLike,
+  deleteBlog
+}
+
+const ConnectedBlog = connect(
+  mapStateToProps,
+  mapDispatchToProps
+  )(Blog)
+
 Blog.propTypes = {
   blog: PropTypes.object.isRequired,
 }
 
-export default Blog
+export default ConnectedBlog

@@ -1,7 +1,7 @@
-export const setNotification = (text, type, seconds) => {
+export const setNotification = (text, type='error', seconds=5) => {
   return async dispatch => {
     dispatch({
-      type: 'CHANGE_MESSAGE',
+      type: 'CHANGE_NOTIFICATION',
       data: {
         text: text,
         type: type
@@ -9,18 +9,18 @@ export const setNotification = (text, type, seconds) => {
     })
     setTimeout(() => {
       dispatch({
-        type: 'CLEAR_MESSAGE'
+        type: 'CLEAR_NOTIFICATION'
         })
     }, seconds*1000)
   }
 }
 
-const notificationReducer = (state = {text: '', type: ''}, action) => {
+const notificationReducer = (state = null, action) => {
   switch (action.type) {
-    case 'CHANGE_MESSAGE':
+    case 'CHANGE_NOTIFICATION':
       return {text: action.data.text, type: action.data.type}
-    case 'CLEAR_MESSAGE':
-      return {text: '', type: ''}
+    case 'CLEAR_NOTIFICATION':
+      return null
     default: return state
   }
 }

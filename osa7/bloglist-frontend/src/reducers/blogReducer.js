@@ -1,8 +1,8 @@
 import blogService from '../services/blogs'
+import {setNotification} from './notificationReducer'
 
 export const initializeBlogs = (blogs) => {
   return async dispatch => {
-    const blogs = await blogService.getAll()
     dispatch({
       type: 'INIT_BLOGS',
       data: blogs,
@@ -12,31 +12,55 @@ export const initializeBlogs = (blogs) => {
 
 export const createBlog = content => {
   return async dispatch => {
-    const newBlog = await blogService.createNew(content)
+    try {
+    const newBlog = await blogService.createBlog(content)
     dispatch({
       type: 'CREATE',
       data: newBlog
     })
+    setNotification(`a new blog ${content.title} by ${content.author} added`, 'success')
+    } catch (err) {
+      console.log(err)
+      if (err.status === 401) {
+        setNotification(err.response.data.error, 'error')
+      } 
+    }
   }
 }
 
 export const deleteBlog = id => {
   return async dispatch => {
-    await blogService.deleteBlog(id)
-    dispatch({
-      type: 'DELETE',
-      data: id
-    })
+    try {
+      await blogService.deleteBlog(id)
+      dispatch({
+        type: 'DELETE',
+        data: id
+      })
+      setNotification('successfully deleted blog', 'success')
+    } catch (err) {
+      console.log(err)
+      if (err.status === 401) {
+        setNotification(err.response.data.error, 'error')
+      } 
+    }
   }
 }
 
 export const addLike = blogObject => {
   return async dispatch => {
-    const likedBlog = await blogService.update(blogObject.id, blogObject, 'addLike')
-    dispatch({
-      type: 'LIKE',
-      data: likedBlog
-    }) 
+    try {
+      const likedBlog = await blogService.updateBlog(blogObject.id, blogObject, 'addLike')
+      dispatch({
+        type: 'LIKE',
+        data: JSON.parse(likedBlog)
+      })
+      setNotification(`liked blog ${likedBlog.title}`, 'success')
+    } catch (err) {
+      console.log(err)
+      if (err.status === 401) {
+        setNotification(err.response.data.error, 'error')
+      } 
+    }
   }
 }
 
@@ -48,7 +72,6 @@ const blogReducer = (state = [], action) => {
       return action.data
     case 'CREATE':
       const newBlog = action.data
-      console.log({newBlog})
       stateCopy = [...state, newBlog]
       return stateCopy
     case 'DELETE':
@@ -60,8 +83,8 @@ const blogReducer = (state = [], action) => {
       }
     case 'LIKE':
       index = state.findIndex(object => object.id === action.data.id)
-      console.log(index)
       if (index !== -1) {
+        console.log({index})
         stateCopy = [...state]
         stateCopy[index] = action.data
         return stateCopy

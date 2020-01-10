@@ -1,25 +1,24 @@
-// import blogService from '..services/blogs'
-import loginService from '..services/login'
-import userService from '..services/users'
+import blogService from '../services/blogs'
+import loginService from '../services/login'
 import {setNotification} from './notificationReducer'
 
 export const reducerLogin = (username, password) => {
   return async dispatch => {
-    loginService.login(username, password)
-      .then(res => {
-        dispatch({
-          type: 'LOGIN',
-           data: {
-             token: res.body.token,
-             username: res.body.username,
-             name: res.body.name
-           }
-        })
-        userService.setToken(res.body.token)
-        window.localStorage.setItem('bloglistLoginData', JSON.stringify(res.body))})
-      .catch(err => {
-        setNotification(err.response, 'error', 5)
+    try {
+      const data = await loginService.login(username, password)
+      dispatch({
+        type: 'LOGIN',
+        data: data
       })
+      blogService.setToken(data.token)
+      window.localStorage.setItem('bloglistLoginData', JSON.stringify(data))
+      setNotification('logged in successfully', 'success')
+     } catch (err) {
+        console.log(err)
+        if (err.status === 401) {
+          setNotification(err.response.data.error, 'error')
+        }
+      }
   }
 }
 
@@ -29,24 +28,27 @@ export const reducerLogout = () => {
       type: 'LOGOUT'
     })
     window.localStorage.removeItem('bloglistLoginData')
+    setNotification('logged out successfully', 'success')
   }
 }
 
 export const useLocalStorage = (userJSON) => {
   return async dispatch => {
+    const user = JSON.parse(userJSON)
     dispatch({
       type: 'USE_LOCAL_STORAGE',
-      data: userJSON
+      data: user
     })
+    blogService.setToken(user.token)
   }
 }
 
-const userReducer = (state = {text: '', type: ''}, action) => {
+const userReducer = (state = null, action) => {
   switch (action.type) {
     case 'LOGIN':
       return {token: action.data.token, username: action.data.username, name: action.data.name}
     case 'LOGOUT':
-      return {token: '', username: '', name: ''}
+      return null
     case 'USE_LOCAL_STORAGE':
       return action.data
     default: return state

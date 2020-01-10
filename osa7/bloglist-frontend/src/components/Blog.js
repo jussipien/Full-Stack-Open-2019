@@ -1,13 +1,10 @@
 import React, {useState} from 'react'
 import {connect} from 'react-redux'
-import PropTypes from 'prop-types'
 import {addLike, deleteBlog} from '../reducers/blogReducer'
-import blogService from '../services/blogs'
 import '../styles/Blog.css'
 
 const Blog = (props) => {
   const blog = props.blog
-  const allBlogs = props.blogs
   const [viewDetails, setViewDetails] = useState(false)
   const detailsStyle = {display: viewDetails ? '' : 'none'}
 
@@ -15,40 +12,13 @@ const Blog = (props) => {
     setViewDetails(!viewDetails)
   }
 
-  const handleLike = async () => { 
-    // let allBlogsCopy = [...allBlogs]
-    // const index = allBlogs.findIndex(b => b.id === blog.id)
-
-    // console.log({index})
-
-    // let blogUser = (blog.user) ? blog.user : null
-
-    // const blogObject = {
-    //   author: blog.author,
-    //   title: blog.title,
-    //   url: blog.url,
-    //   user: blogUser.id,
-    //   likes: blog.likes + 1
-    // }
-
-    // console.log({blogObject})
-
-    // update with type addLike in header updateType; backend in part 4 modified to
-    // make updating possible by any logged in user when updateType is addLike;
-    // not very secure for real use
-    // let updatedBlog = await blogService.updateBlog(blog.id, blogObject, 'addLike')
+  const handleLike = () => { 
     props.addLike(blog)
   }
 
   const handleDelete = async () => {
     if (window.confirm(`remove blog ${blog.title} by ${blog.author}`)) {
       props.deleteBlog(blog.id)
-      // let allBlogsCopy = [...allBlogs]
-      // const index = allBlogs.findIndex(b => b.id === blog.id)
-      // const res = await blogService.deleteBlog(blog.id)
-      // if (res.status === 204) {
-      //   allBlogsCopy.splice(index, 1)
-      //   setBlogs(allBlogsCopy)
       console.log(`successfully deleted blog with id ${blog.id}`)
     }
   }
@@ -72,7 +42,6 @@ const Blog = (props) => {
 }
 
 const mapStateToProps = (state) => {
-  console.log(state)
   return {
     blogs: state.blogs
   }
@@ -83,13 +52,6 @@ const mapDispatchToProps = {
   deleteBlog
 }
 
-const ConnectedBlog = connect(
-  mapStateToProps,
-  mapDispatchToProps
-  )(Blog)
-
-Blog.propTypes = {
-  blog: PropTypes.object.isRequired,
-}
+const ConnectedBlog = connect(mapStateToProps, mapDispatchToProps)(Blog)
 
 export default ConnectedBlog

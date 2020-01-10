@@ -3,7 +3,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import {Provider} from 'react-redux'
 import App from './App'
-import blogReducer, {initializeBlogs} from './reducers/blogReducer'
+import {initializeBlogs} from './reducers/blogReducer'
 import blogservice from './services/blogs'
 import store from './store'
 

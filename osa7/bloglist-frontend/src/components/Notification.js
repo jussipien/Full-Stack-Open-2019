@@ -1,32 +1,25 @@
 import React from 'react'
 import {connect} from 'react-redux'
-// import PropTypes from 'prop-types'
 
 const Notification = (props) => {
-  const text = props.notification.text
-  const type = props.notification.type
+  const notification = props.notification
 
-  return (!!text)
+  return !!notification
     ? (
-    <div className={`Message ${type}`}>
-      {text}
+    <div className={`Message ${notification.type}`}>
+      {notification.text}
     </div>
     ) 
     : <></>
 }
 
 const mapStateToProps = (state) => {
-  console.log(state)
+  console.log(`state in notification: ${state.notification}`)
   return {
     notification: state.notification
   }
 }
 
-// Notification.propTypes = {
-//   text: PropTypes.string.isRequired,
-//   type: PropTypes.string.isRequired
-// }
-
-const ConnectedNotification = connect(mapStateToProps, null)(Notification)
+const ConnectedNotification = connect(mapStateToProps)(Notification)
 
 export default ConnectedNotification

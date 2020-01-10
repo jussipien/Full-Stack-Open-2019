@@ -7,6 +7,7 @@ import '../styles/Blog.css'
 
 const Blog = (props) => {
   const blog = props.blog
+  const allBlogs = props.blogs
   const [viewDetails, setViewDetails] = useState(false)
   const detailsStyle = {display: viewDetails ? '' : 'none'}
 
@@ -18,22 +19,25 @@ const Blog = (props) => {
     // let allBlogsCopy = [...allBlogs]
     // const index = allBlogs.findIndex(b => b.id === blog.id)
 
-    let blogUser = (blog.user) ? blog.user : null
+    // console.log({index})
 
-    const blogObject = {
-      author: blog.author,
-      title: blog.title,
-      url: blog.url,
-      user: blogUser.id,
-      likes: blog.likes + 1
-    }
+    // let blogUser = (blog.user) ? blog.user : null
 
-    console.log({blogObject})
+    // const blogObject = {
+    //   author: blog.author,
+    //   title: blog.title,
+    //   url: blog.url,
+    //   user: blogUser.id,
+    //   likes: blog.likes + 1
+    // }
+
+    // console.log({blogObject})
 
     // update with type addLike in header updateType; backend in part 4 modified to
     // make updating possible by any logged in user when updateType is addLike;
     // not very secure for real use
-    props.addLike(blogObject)
+    // let updatedBlog = await blogService.updateBlog(blog.id, blogObject, 'addLike')
+    props.addLike(blog)
   }
 
   const handleDelete = async () => {
@@ -45,8 +49,7 @@ const Blog = (props) => {
       // if (res.status === 204) {
       //   allBlogsCopy.splice(index, 1)
       //   setBlogs(allBlogsCopy)
-      //   console.log(`successfully deleted blog with id ${blog.id}`)
-      // }
+      console.log(`successfully deleted blog with id ${blog.id}`)
     }
   }
 

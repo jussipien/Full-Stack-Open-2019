@@ -5,8 +5,9 @@ import Blog from './components/Blog'
 import TableForm from './components/Form'
 import Togglable from './components/Togglable'
 import Notification from './components/Notification'
-import {setNotification}  from './reducers/notificationReducer'
 import {initializeBlogs, createBlog} from './reducers/blogReducer'
+import {setNotification}  from './reducers/notificationReducer'
+import {reducerLogin, reducerLogout, useLocalStorage}  from './reducers/userReducer'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import './App.css'
@@ -47,7 +48,7 @@ const View = ({user, blogs, loginForm, createForm, logoutAction, messageText, me
 }
 
 const App = (props) => {
-  const [user, setUser] = useState(null)
+  // const [user, setUser] = useState(null)
   const newTitle = useField('text')
   const newAuthor = useField('text')
   const newUrl = useField('text')
@@ -68,36 +69,38 @@ const App = (props) => {
   const handleLogin = async (event) => {
     event.preventDefault()
     console.log('logging in with', username.value, password.value)
-    try {
-      const user = await loginService.login(username.value, password.value)
-      console.log(user)
-      setUser(user)
-      window.localStorage.setItem(
-        'bloglistLoginData', JSON.stringify(user)
-      ) 
-      blogService.setToken(user.token)
-      ('login successful!', 'success')
-      username.reset()
-      password.reset()
-    } catch (error) {
-      console.log(error.response)
-      displayNotification(error.response, 'error')
-    }
+    props.login(username.value, password.value)
+    // try {
+    //   const user = await loginService.login(username.value, password.value)
+    //   console.log(user)
+    //   setUser(user)
+    //   window.localStorage.setItem(
+    //     'bloglistLoginData', JSON.stringify(user)
+    //   ) 
+    //   blogService.setToken(user.token)
+    //   ('login successful!', 'success')
+    //   username.reset()
+    //   password.reset()
+    // } catch (error) {
+    //   console.log(error.response)
+    //   displayNotification(error.response, 'error')
+    // }
   }
 
   const handleLogout = (event) => {
     event.preventDefault()
     console.log('logging out')
-    setUser(null)
-    window.localStorage.removeItem('bloglistLoginData')
-    displayNotification('logged out successfully', 'success')
+    props.logout()
+    // setUser(null)
+    // window.localStorage.removeItem('bloglistLoginData')
+    // displayNotification('logged out successfully', 'success')
   }
 
   const handleCreate = async (event) => {
     event.preventDefault()
     createFormRef.current.toggleVisibility()
     console.log(`adding new blog with name ${newTitle.value}, author ${newAuthor.value}`)
-    const newBlogData = {title: newTitle.value, author: newAuthor.value, url: newUrl.value, user: user.token}
+    const newBlogData = {title: newTitle.value, author: newAuthor.value, url: newUrl.value, user: props.user.token}
     try {
       const blog = await props.createBlog(newBlogData)
       displayNotification(`a new blog ${blog.title} by ${blog.author} added`, 'success')
@@ -177,15 +180,13 @@ const App = (props) => {
   useEffect(() => {
     const userJSON = window.localStorage.getItem('bloglistLoginData')
     if (userJSON) {
-      const user = JSON.parse(userJSON)
-      setUser(user)
-      blogService.setToken(user.token)
+      props.useLocalStorage(userJSON)
     }
   }, [])
 
   return (
     <div className="App">
-      <View user={user} loginForm={loginForm} logoutAction={handleLogout} createForm={createForm}/>
+      <View user={props.user} blogs={props.blogs} loginForm={loginForm} logoutAction={handleLogout} createForm={createForm}/>
     </div>
   )
 }
@@ -193,13 +194,17 @@ const App = (props) => {
 const mapStateToProps = (state) => {
   console.log(state)
   return {
-    blogs: state.blogs
+    blogs: state.blogs,
+    user: state.user
   }
 }
 
 const mapDispatchToProps = {
   createBlog,
-  setNotification
+  setNotification,
+  reducerLogin,
+  reducerLogout,
+  useLocalStorage
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(App)
